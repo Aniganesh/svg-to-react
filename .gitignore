@@ -6,3 +6,5 @@ build/
 
 # Ignore dist folder
 dist/
+.vscode 
+*.code-workspace

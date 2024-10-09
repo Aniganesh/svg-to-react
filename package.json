@@ -11,9 +11,12 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-xml": "^6.1.0",
     "@remix-run/node": "^2.12.1",
     "@remix-run/react": "^2.12.1",
     "@remix-run/serve": "^2.12.1",
+    "@uiw/react-codemirror": "^4.23.5",
     "@zip.js/zip.js": "^2.7.52",
     "isbot": "^4.1.0",
     "react": "^18.2.0",

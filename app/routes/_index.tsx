@@ -1,7 +1,7 @@
 import { type MetaFunction } from "@remix-run/node";
 import { convertSvgToReact } from "../script";
 import { BlobReader, ZipReader, TextWriter, BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
-
+import { CodeEditor } from "~/components/CodeEditor";
 
 export const meta: MetaFunction = () => {
   return [
@@ -53,7 +53,12 @@ export default function Index() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="h-screen items-center justify-center">
+      <div className="flex flex-row gap-4">
+        <CodeEditor value="" type="xml" />
+        <CodeEditor value="" type="js" />
+      </div>
+
       <form onSubmit={handleSubmit}>
         <input type="file" name="file" id="file" accept="image/svg, application/zip" multiple />
         <button type="submit">Submit</button>

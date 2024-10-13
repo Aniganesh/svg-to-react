@@ -55,10 +55,11 @@ export default function Index() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-  
+
   useEffect(() => {
     handleXmlChange();
-  }, [conversionOptions, handleXmlChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversionOptions]);
 
   return (
     <div className="min-h-screen flex flex-col">

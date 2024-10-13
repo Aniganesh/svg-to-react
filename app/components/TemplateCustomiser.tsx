@@ -9,8 +9,8 @@ import { Toggle } from './ui/toggle';
 interface TemplateCustomizerProps {
 	conversionOptions: DeepPartial<TemplateOptions>;
 	setConversionOptions: (value: DeepPartial<TemplateOptions>) => void;
-	componentNameRef: React.MutableRefObject<string>;
-	handleComponentNameChange: (value: string) => void;
+	componentNameRef?: React.MutableRefObject<string>;
+	handleComponentNameChange?: (value: string) => void;
 }
 
 export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
@@ -20,7 +20,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 	handleComponentNameChange,
 }) => {
 	return <div className="flex items-center space-x-4 mb-4">
-		<input
+		{!!componentNameRef && !!handleComponentNameChange && <input
 			type="text"
 			defaultValue={componentNameRef.current}
 			className="flex-grow p-2 text-white outline-none bg-transparent border-b border-transparent focus:border-white flex-1"
@@ -28,7 +28,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				handleComponentNameChange(e.target.value);
 			}}
 			placeholder="Enter component name"
-		/>
+		/>}
 		<div className="flex items-center space-x-4 flex-1">
 			<Toggle
 				highlightStyles={(value) => ({
@@ -62,7 +62,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 					className="flex-1"
 					onChange={(e) => {
 						const name = e.target.value;
-						setConversionOptions( ({
+						setConversionOptions(({
 							...conversionOptions,
 							interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
 						}));
@@ -75,7 +75,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 					value={conversionOptions.interfaceExtend?.from || ''}
 					onChange={(e) => {
 						const from = e.target.value;
-						setConversionOptions( ({
+						setConversionOptions(({
 							...conversionOptions,
 							interfaceExtend: { ...conversionOptions.interfaceExtend, from }
 						}));

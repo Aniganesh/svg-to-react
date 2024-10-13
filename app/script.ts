@@ -253,7 +253,7 @@ const allSVGAttributes = [
 const DEFAULT_LANGUAGE = "ts";
 const TYPESCRIPT_KEY = "ts";
 
-function toStartCase(str: string) {
+export function toStartCase(str: string) {
   const words = str.split("-");
   const res: string[] = [];
   words.forEach((word) => {

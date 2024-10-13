@@ -1,5 +1,6 @@
 'use client';
-import ReactCodeMirror, { oneDarkTheme } from '@uiw/react-codemirror';
+import ReactCodeMirror from '@uiw/react-codemirror';
+import { barf } from 'thememirror';
 import { xml } from '@codemirror/lang-xml';
 import { javascript } from '@codemirror/lang-javascript';
 import { ClientOnly } from './ClientOnly';
@@ -14,7 +15,7 @@ interface CodeEditorProps {
 
 export const CodeEditor: FC<CodeEditorProps> = ({ value, onChange, type, editable = true }) => {
 	return <ClientOnly>
-		<ReactCodeMirror className="flex-1" height="100%" value={value} onChange={onChange} extensions={[type === 'xml' ? xml() : javascript()]} theme={oneDarkTheme}
+		<ReactCodeMirror className="flex-1" height="100%" value={value} onChange={onChange} extensions={[type === 'xml' ? xml() : javascript()]} theme={barf}
 			minHeight='90vh' editable={editable} />
 	</ClientOnly>;
 };

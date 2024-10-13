@@ -53,6 +53,14 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 					}}
 				/>
 				<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
+				<Switch
+					id="rn-svg"
+					checked={conversionOptions.reactNative}
+					onCheckedChange={(checked: boolean) => {
+						setConversionOptions(({ ...conversionOptions, reactNative: checked }));
+					}}
+				/>
+				<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
 			</div>
 			<div className="flex items-center space-x-2">
 				<Input

@@ -249,6 +249,87 @@ const allSVGAttributes = [
   "z",
   "zoomAndPan",
 ];
+const allSVGElements = [
+  "a",
+  "animate",
+  "animateMotion",
+  "animateTransform",
+  "circle",
+  "clipPath",
+  "defs",
+  "desc",
+  "ellipse",
+  "feBlend",
+  "feColorMatrix",
+  "feComponentTransfer",
+  "feComposite",
+  "feConvolveMatrix",
+  "feDiffuseLighting",
+  "feDisplacementMap",
+  "feDistantLight",
+  "feDropShadow",
+  "feFlood",
+  "feFuncA",
+  "feFuncB",
+  "feFuncG",
+  "feFuncR",
+  "feGaussianBlur",
+  "feImage",
+  "feMerge",
+  "feMergeNode",
+  "feMorphology",
+  "feOffset",
+  "fePointLight",
+  "feSpecularLighting",
+  "feSpotLight",
+  "feTile",
+  "feTurbulence",
+  "filter",
+  "foreignObject",
+  "g",
+  "image",
+  "line",
+  "linearGradient",
+  "marker",
+  "mask",
+  "metadata",
+  "mpath",
+  "path",
+  "pattern",
+  "polygon",
+  "polyline",
+  "radialGradient",
+  "rect",
+  "script",
+  "set",
+  "stop",
+  "style",
+  "svg",
+  "switch",
+  "symbol",
+  "text",
+  "textPath",
+  "title",
+  "tspan",
+  "use",
+  "view",
+  "cursor",
+  "font",
+  "font-face",
+  "font-face-format",
+  "font-face-name",
+  "font-face-src",
+  "font-face-uri",
+  "glyph",
+  "glyphRef",
+  "hkern",
+  "missing-glyph",
+  "tref",
+  "vkern",
+];
+const allSVGElementsRegexp = allSVGElements.map(
+  (element) => new RegExp(`<${element}.*`),
+);
 
 const DEFAULT_LANGUAGE = "ts";
 const TYPESCRIPT_KEY = "ts";
@@ -276,6 +357,17 @@ function toCamelCase(str: string) {
 export interface TemplateOptions {
   addDefaultExport?: boolean;
   language: "ts" | "js";
+  reactNative?: boolean;
+  /*  TODO:
+  Add support for:
+  - replacing values
+  - prettier
+  - prop spread
+  - ref
+  - memo
+  - title, description props
+   */
+
   interfaceExtend?: {
     from?: string;
     name: string;
@@ -289,30 +381,34 @@ const defaultTemplateOptions: TemplateOptions = {
 
 const reactTSImport = "import React, { FC } from 'react';";
 const reactJSImport = "import React from 'react';";
+const reactNativeImport = "import { %rnSvgImports% } from 'react-native-svg';";
 
 const reactTSImportExtendingInterface = `import { %extend% } from "%import%";`;
 
 const reactTSInterfaceWithoutExtend = "interface %name%Props { }";
-const reactTSInterfaceWithExtend = "interface %name%Props extends %extend% {}";
+const reactTSInterfaceWithExtend = "interface %name%Props extends %extend% { }";
 
 const defaultExport = "export default %name%;";
 
-const namedExportTS = `export const %name%: FC<%name%Props> = (props) => {
+const namedExportReactTS = `export const %name%: FC<%name%Props> = (props) => {
 	return %componentContent%;
 };`;
-const namedExportJS = `export const %name% = (props) => {
+
+const namedExportReactJS = `export const %name% = (props) => {
 	return %componentContent%;
 };`;
 
 const groupedByLanguage = {
   js: {
     import: reactJSImport,
-    namedExport: namedExportJS,
+    namedExport: namedExportReactJS,
+    reactNativeImport,
     defaultExport,
   } as const,
   ts: {
     import: reactTSImport,
-    namedExport: namedExportTS,
+    reactNativeImport,
+    namedExport: namedExportReactTS,
     interfaceWithoutExtend: reactTSInterfaceWithoutExtend,
     interfaceWithExtend: reactTSInterfaceWithExtend,
     importExtendingInterface: reactTSImportExtendingInterface,
@@ -328,6 +424,9 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
   const setToUse = groupedByLanguage[options.language ?? DEFAULT_LANGUAGE];
 
   template.push(setToUse.import);
+  if (options.reactNative) {
+    template.push(setToUse.reactNativeImport);
+  }
 
   if (options.language === TYPESCRIPT_KEY) {
     if (options.interfaceExtend?.from) {
@@ -352,7 +451,7 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
     template.push(setToUse.defaultExport);
   }
 
-  return template.join("\n\n");
+  return template.join("\n");
 };
 
 const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
@@ -373,10 +472,35 @@ export const convertSvgToReact = (
       );
     }
   });
+
   let fileContent = getReactTemplate(templateOptions).replace(
     /%name%/g,
     toStartCase(name),
   );
+  fileContent = fileContent.replace(/%componentContent%/g, svgContent);
+
+  if (templateOptions.reactNative) {
+    const svgElementsUsed = allSVGElementsRegexp.reduce(
+      (acc, curr, index) =>
+        curr.test(fileContent) ? [...acc, allSVGElements[index]] : acc,
+      [] as string[],
+    );
+    svgElementsUsed.forEach((element) => {
+      fileContent = fileContent.replace(
+        new RegExp(`<${element}`, "g"),
+        `<${toStartCase(element)}`,
+      );
+      fileContent = fileContent.replace(
+        new RegExp(`</${element}`, "g"),
+        `</${toStartCase(element)}`,
+      );
+    });
+    fileContent = fileContent.replace(
+      /%rnSvgImports%/g,
+      svgElementsUsed.map((element) => toStartCase(element)).join(", "),
+    );
+  }
+
   if (templateOptions.interfaceExtend?.name) {
     fileContent = fileContent.replace(
       /%extend%/g,
@@ -389,9 +513,8 @@ export const convertSvgToReact = (
       templateOptions.interfaceExtend.from,
     );
   }
-  fileContent = fileContent.replace(/%componentContent%/g, svgContent);
   fileContent = fileContent.replace(XMLDeclarationRegex, "");
   fileContent = fileContent.replace(HTMLCommentRegex, "");
-  fileContent = fileContent.replace(/return\s*\n/g, "return");
+  fileContent = fileContent.replace(/return\s*\n/g, "return ");
   return fileContent;
 };

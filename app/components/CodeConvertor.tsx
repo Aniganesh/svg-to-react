@@ -61,8 +61,10 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 			handleComponentNameChange={handleComponentNameChange}
 		/>
 		<div className="flex flex-col md:flex-row gap-4">
-			<CodeEditor onChange={handleXmlChange} type="xml" />
-			<div className="relative flex-1">
+			<div className="max-w-[50%] flex-1">
+				<CodeEditor onChange={handleXmlChange} type="xml" />
+			</div>
+			<div className="relative flex-1 max-w-[50%]">
 				<div className="absolute right-2 top-2 z-10 flex gap-2">
 					<Button className="shadow-xl shadow-slate-700/50" onClick={copyJS}><ClipboardCopy size={18} /></Button>
 					<Button className="shadow-xl shadow-slate-700/50" onClick={downloadJS}><Download size={18} /></Button>

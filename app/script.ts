@@ -1,4 +1,6 @@
 import { DeepPartial } from "./util-types";
+import { format } from "prettier";
+
 const allSVGAttributes = [
   "accent-height",
   "accumulate",
@@ -361,7 +363,6 @@ export interface TemplateOptions {
   /*  TODO:
   Add support for:
   - replacing values
-  - prettier
   - prop spread
   - ref
   - memo
@@ -458,7 +459,7 @@ const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
   attribute.includes("-"),
 );
 
-export const convertSvgToReact = (
+export const convertSvgToReact =async (
   svgContent: string,
   name: string,
   templateOptions: DeepPartial<TemplateOptions> = defaultTemplateOptions,
@@ -516,5 +517,5 @@ export const convertSvgToReact = (
   fileContent = fileContent.replace(XMLDeclarationRegex, "");
   fileContent = fileContent.replace(HTMLCommentRegex, "");
   fileContent = fileContent.replace(/return\s*\n/g, "return ");
-  return fileContent;
+  return format(fileContent, { parser: "babel" });
 };

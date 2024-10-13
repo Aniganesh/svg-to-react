@@ -54,7 +54,7 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 				const textContentWriter = new TextWriter();
 				const content = await file.getData(textContentWriter);
 				const componentName = toStartCase(file.filename.replace(/\.[^/.]+$/, ""));
-				const svgContent = convertSvgToReact(content, componentName, conversionOptions as TemplateOptions);
+				const svgContent = await convertSvgToReact(content, componentName, conversionOptions as TemplateOptions);
 				return { content: svgContent, name: componentName };
 			}));
 
@@ -71,7 +71,7 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 		}
 		const fileContent = await file.text();
 		const componentName = toStartCase(file.name.replace(/\.[^/.]+$/, ""));
-		const svgContent = convertSvgToReact(fileContent, componentName, conversionOptions as TemplateOptions);
+		const svgContent = await convertSvgToReact(fileContent, componentName, conversionOptions as TemplateOptions);
 		const blob = new Blob([svgContent], { type: "text/plain", });
 		const url = URL.createObjectURL(blob);
 		downloadFile(url, `${componentName}.${conversionOptions.language === "ts" ? "tsx" : "jsx"}`);

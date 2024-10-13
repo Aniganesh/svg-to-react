@@ -18,12 +18,12 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 		interfaceExtend: undefined,
 	});
 
-	const handleXmlChange = (value?: string) => {
+	const handleXmlChange = async (value?: string) => {
 		if (value) {
 			lastXMLValueRef.current = value;
 		}
 		if (lastXMLValueRef.current)
-			setJs(convertSvgToReact(lastXMLValueRef.current, componentNameRef.current, conversionOptions));
+			setJs(await convertSvgToReact(lastXMLValueRef.current, componentNameRef.current, conversionOptions));
 	};
 
 	const handleComponentNameChange = (value: string) => {

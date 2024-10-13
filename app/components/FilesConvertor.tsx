@@ -1,22 +1,47 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BlobReader, ZipReader, TextWriter, BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { convertSvgToReact, TemplateOptions, toStartCase } from "../script";
 import { Button } from "~/components/ui/button";
 import { TemplateCustomizer } from "./TemplateCustomiser";
 import { DeepPartial } from "~/util-types";
+import { useDropzone } from 'react-dropzone-esm';
+import { cn } from "~/lib/utils";
 
 interface FilesConvertorProps { }
 
+const downloadFile = (url: string, filename: string) => {
+	const downloadLink = document.createElement("a");
+	downloadLink.href = url;
+	downloadLink.download = filename;
+	downloadLink.click();
+};
+
 export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
+	const [file, setFile] = useState<File | undefined>(undefined);
 	const [conversionOptions, setConversionOptions] = useState<DeepPartial<TemplateOptions>>({
 		addDefaultExport: true,
 		language: "ts",
 	});
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+	const onDrop = useCallback(async (acceptedFiles: File[]) => {
+		const file = acceptedFiles[0];
+		if (!file) {
+			return;
+		}
+		setFile(file);
+	}, []);
+
+	const { getRootProps, getInputProps, isDragActive } = useDropzone({
+		onDrop,
+		accept: { file: ['image/svg+xml', 'application/zip'] },
+	});
+
+
+
+	const handleConvert = async (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
-		const formData = new FormData(e.currentTarget);
-		const file = (formData.get("file") as File | null);
+		e.stopPropagation();
 		if (!file) {
 			return;
 		}
@@ -41,10 +66,7 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 			);
 
 			const url = URL.createObjectURL(await zipWriter.close());
-			const downloadLink = document.createElement("a");
-			downloadLink.href = url;
-			downloadLink.download = `react-components.zip`;
-			downloadLink.click();
+			downloadFile(url, `react-components.zip`);
 			return;
 		}
 		const fileContent = await file.text();
@@ -52,10 +74,7 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 		const svgContent = convertSvgToReact(fileContent, componentName, conversionOptions as TemplateOptions);
 		const blob = new Blob([svgContent], { type: "text/plain", });
 		const url = URL.createObjectURL(blob);
-		const downloadLink = document.createElement("a");
-		downloadLink.href = url;
-		downloadLink.download = `${componentName}.${conversionOptions.language === "ts" ? "tsx" : "jsx"}`;
-		downloadLink.click();
+		downloadFile(url, `${componentName}.${conversionOptions.language === "ts" ? "tsx" : "jsx"}`);
 	};
 
 	return (
@@ -66,29 +85,32 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 					setConversionOptions={setConversionOptions}
 				/>
 			</div>
-			<div className="flex items-center justify-center min-h-full border-dashed border-2 border-gray-600 rounded-lg">
-				<div className="w-full max-w-3xl space-y-8">
-					<form onSubmit={handleSubmit} className="space-y-6 w-full flex flex-col items-center">
-						<div>
-							<label htmlFor="file" className="block text-sm font-medium text-gray-300 text-center">
-								Upload SVG or ZIP file
-							</label>
-							<input
-								title=" "
-								type="file"
-								name="file"
-								id="file"
-								accept="image/svg+xml, application/zip"
-								multiple
-								className="mt-1 block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-							/>
-						</div>
-						<Button type="submit">
-							Convert and Download
-						</Button>
-					</form>
+			<div className={cn("flex items-center justify-center min-h-full border-dashed border-2 border-gray-600 rounded-lg", {
+				'bg-gray-500/50': isDragActive,
+			})} {...getRootProps()}>
+				<div className="w-full max-w-3xl gap-8 flex flex-col items-center">
+					<div className="gap-6 w-full flex flex-col items-center justify-center">
+
+						<label htmlFor="file" className="block text-xl font-medium text-gray-300 text-center">
+							{!file ? "Drop or click to upload SVG or ZIP file" : file.name}
+						</label>
+						<input
+							{...getInputProps()}
+							title=" "
+							type="file"
+							name="file"
+							id="file"
+							accept="image/svg+xml, application/zip"
+							multiple
+						/>
+					</div>
+					<Button onClick={handleConvert}>
+						Convert and Download
+					</Button>
+
 				</div>
-			</div>
+			</div >
+
 		</>
 	);
 };

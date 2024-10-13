@@ -269,7 +269,7 @@ function toCamelCase(str: string) {
   return [words[0]].concat(res).join("");
 }
 
-interface TemplateOptions {
+export interface TemplateOptions {
   addDefaultExport?: boolean;
   language: "ts" | "js";
 }
@@ -290,12 +290,10 @@ const defaultExport = "export default %name%;";
 
 const namedExportTS = `export const %name%: FC<%name%Props> = (props) => {
 	return %componentContent%;
-};
-`;
+};`;
 const namedExportJS = `export const %name% = (props) => {
 	return %componentContent%;
-};
-`;
+};`;
 
 const groupedByLanguage = {
   js: {
@@ -323,7 +321,7 @@ const getReactTemplate = (options: TemplateOptions) => {
 
   if (options.language === "ts") {
     template.push(
-      (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend
+      (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
     );
   }
 
@@ -333,30 +331,30 @@ const getReactTemplate = (options: TemplateOptions) => {
     template.push(setToUse.defaultExport);
   }
 
-  return template.join("\n");
+  return template.join("\n\n");
 };
 
 const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
-  attribute.includes("-")
+  attribute.includes("-"),
 );
 
 export const convertSvgToReact = (
   svgContent: string,
   name: string,
-  templateOptions: TemplateOptions = defaultTemplateOptions
+  templateOptions: TemplateOptions = defaultTemplateOptions,
 ) => {
   // replace each of the disallowed attributes with their camelcase equivalents.
   attributesWithHyphen.forEach((attribute) => {
     if (svgContent.includes(attribute)) {
       svgContent = svgContent.replace(
         new RegExp(`${attribute}=`, "g"),
-        toCamelCase(attribute) + "="
+        toCamelCase(attribute) + "=",
       );
     }
   });
   let fileContent = getReactTemplate(templateOptions).replace(
     /%name%/g,
-    toStartCase(name)
+    toStartCase(name),
   );
   fileContent = fileContent.replace(/%componentContent%/g, svgContent);
   fileContent = fileContent.replace(XMLDeclarationRegex, "");

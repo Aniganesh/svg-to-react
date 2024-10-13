@@ -1,3 +1,4 @@
+import { DeepPartial } from "./util-types";
 const allSVGAttributes = [
   "accent-height",
   "accumulate",
@@ -249,6 +250,9 @@ const allSVGAttributes = [
   "zoomAndPan",
 ];
 
+const DEFAULT_LANGUAGE = "ts";
+const TYPESCRIPT_KEY = "ts";
+
 function toStartCase(str: string) {
   const words = str.split("-");
   const res: string[] = [];
@@ -272,18 +276,23 @@ function toCamelCase(str: string) {
 export interface TemplateOptions {
   addDefaultExport?: boolean;
   language: "ts" | "js";
+  interfaceExtend?: {
+    from?: string;
+    name: string;
+  };
 }
 
 const defaultTemplateOptions: TemplateOptions = {
   addDefaultExport: true,
-  language: "ts",
+  language: TYPESCRIPT_KEY,
 };
 
 const reactTSImport = "import React, { FC } from 'react';";
 const reactJSImport = "import React from 'react';";
 
+const reactTSImportExtendingInterface = `import { %extend% } from "%import%";`;
+
 const reactTSInterfaceWithoutExtend = "interface %name%Props { }";
-// TODO: Add support for using interface with extend
 const reactTSInterfaceWithExtend = "interface %name%Props extends %extend% {}";
 
 const defaultExport = "export default %name%;";
@@ -306,6 +315,7 @@ const groupedByLanguage = {
     namedExport: namedExportTS,
     interfaceWithoutExtend: reactTSInterfaceWithoutExtend,
     interfaceWithExtend: reactTSInterfaceWithExtend,
+    importExtendingInterface: reactTSImportExtendingInterface,
     defaultExport,
   } as const,
 } as const;
@@ -313,16 +323,27 @@ const groupedByLanguage = {
 const XMLDeclarationRegex = /<\?xml\s+.*\?>/;
 const HTMLCommentRegex = /<!--[\s\S]*?-->/;
 
-const getReactTemplate = (options: TemplateOptions) => {
+const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
   const template: string[] = [];
-  const setToUse = groupedByLanguage[options.language];
+  const setToUse = groupedByLanguage[options.language ?? DEFAULT_LANGUAGE];
 
   template.push(setToUse.import);
 
-  if (options.language === "ts") {
-    template.push(
-      (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
-    );
+  if (options.language === TYPESCRIPT_KEY) {
+    if (options.interfaceExtend?.from) {
+      template.push(
+        (setToUse as (typeof groupedByLanguage)["ts"]).importExtendingInterface,
+      );
+    }
+    if (options.interfaceExtend?.name) {
+      template.push(
+        (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithExtend,
+      );
+    } else {
+      template.push(
+        (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
+      );
+    }
   }
 
   template.push(setToUse.namedExport);
@@ -341,7 +362,7 @@ const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
 export const convertSvgToReact = (
   svgContent: string,
   name: string,
-  templateOptions: TemplateOptions = defaultTemplateOptions,
+  templateOptions: DeepPartial<TemplateOptions> = defaultTemplateOptions,
 ) => {
   // replace each of the disallowed attributes with their camelcase equivalents.
   attributesWithHyphen.forEach((attribute) => {
@@ -356,6 +377,18 @@ export const convertSvgToReact = (
     /%name%/g,
     toStartCase(name),
   );
+  if (templateOptions.interfaceExtend?.name) {
+    fileContent = fileContent.replace(
+      /%extend%/g,
+      templateOptions.interfaceExtend.name,
+    );
+  }
+  if (templateOptions.interfaceExtend?.from) {
+    fileContent = fileContent.replace(
+      /%import%/g,
+      templateOptions.interfaceExtend.from,
+    );
+  }
   fileContent = fileContent.replace(/%componentContent%/g, svgContent);
   fileContent = fileContent.replace(XMLDeclarationRegex, "");
   fileContent = fileContent.replace(HTMLCommentRegex, "");

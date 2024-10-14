@@ -1,5 +1,7 @@
 import { DeepPartial } from "./util-types";
-import { format } from "prettier";
+import prettier from "prettier/standalone";
+import * as typescript from "prettier/plugins/typescript.js";
+import * as estree from "prettier/plugins/estree";
 
 const allSVGAttributes = [
   "accent-height",
@@ -363,12 +365,11 @@ export interface TemplateOptions {
   /*  TODO:
   Add support for:
   - replacing values
-  - prop spread
   - ref
   - memo
   - title, description props
    */
-
+  spreadProps?: "start" | "end";
   interfaceExtend?: {
     from?: string;
     name: string;
@@ -459,7 +460,7 @@ const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
   attribute.includes("-"),
 );
 
-export const convertSvgToReact =async (
+export const convertSvgToReact = async (
   svgContent: string,
   name: string,
   templateOptions: DeepPartial<TemplateOptions> = defaultTemplateOptions,
@@ -514,8 +515,31 @@ export const convertSvgToReact =async (
       templateOptions.interfaceExtend.from,
     );
   }
+  switch (templateOptions.spreadProps) {
+    case "start":
+      fileContent = fileContent?.replace(/<svg(.*?)>/g, "<svg {...props} $1>");
+      break;
+    case "end":
+      fileContent = fileContent?.replace(/<svg(.*?)>/g, "<svg $1 {...props}>");
+      break;
+    default:
+      break;
+  }
   fileContent = fileContent.replace(XMLDeclarationRegex, "");
   fileContent = fileContent.replace(HTMLCommentRegex, "");
   fileContent = fileContent.replace(/return\s*\n/g, "return ");
-  return format(fileContent, { parser: "babel" });
+
+  return prettier.format(fileContent, {
+    parser: "typescript",
+    plugins: [typescript, estree],
+    semi: true,
+    singleQuote: false,
+    trailingComma: "none",
+    printWidth: 100,
+    tabWidth: 2,
+    useTabs: false,
+    jsxSingleQuote: false,
+    bracketSpacing: true,
+    arrowParens: "avoid",
+  });
 };

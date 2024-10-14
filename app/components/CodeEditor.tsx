@@ -15,8 +15,24 @@ interface CodeEditorProps {
 
 export const CodeEditor: FC<CodeEditorProps> = ({ value, onChange, type, editable = true }) => {
 	return <ClientOnly>
-		<ReactCodeMirror className="flex-1" height="100%" value={value} onChange={onChange} extensions={[type === 'xml' ? xml() : javascript()]} theme={barf}
-			minHeight='90vh' editable={editable} />
+		<ReactCodeMirror
+			height="100%"
+			value={value}
+			onChange={onChange}
+			extensions={[type === 'xml' ? xml() : javascript()]}
+			basicSetup={{
+				foldGutter: true,
+				autocompletion: true,
+				lineNumbers: true,
+				allowMultipleSelections: true,
+				highlightActiveLine: true,
+				highlightSelectionMatches: true,
+				indentOnInput: true,
+				tabSize: 2,
+			}}
+			theme={barf}
+			minHeight='90vh'
+			editable={editable} />
 	</ClientOnly>;
 };
 

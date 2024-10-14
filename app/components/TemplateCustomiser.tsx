@@ -5,6 +5,7 @@ import { TemplateOptions } from '~/script';
 import { DeepPartial } from '~/util-types';
 import { Input } from './ui/input';
 import { Toggle } from './ui/toggle';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface TemplateCustomizerProps {
 	conversionOptions: DeepPartial<TemplateOptions>;
@@ -23,7 +24,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 		{!!componentNameRef && !!handleComponentNameChange && <input
 			type="text"
 			defaultValue={componentNameRef.current}
-			className="flex-grow p-2 text-white outline-none bg-transparent border-b border-transparent focus:border-white flex-1"
+			className="p-2 text-white outline-none bg-transparent border-b border-transparent focus:border-white flex-1"
 			onChange={(e) => {
 				handleComponentNameChange(e.target.value);
 			}}
@@ -62,6 +63,21 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				/>
 				<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
 			</div>
+			<Select
+				value={conversionOptions.spreadProps}
+				onValueChange={(value) => {
+					setConversionOptions({ ...conversionOptions, spreadProps: value as TemplateOptions['spreadProps'] });
+				}}
+			>
+				<SelectTrigger className="w-32">
+					<SelectValue placeholder="Spread Props" />
+				</SelectTrigger>
+				<SelectContent className="flex-1">
+					<SelectItem value="none">None</SelectItem>
+					<SelectItem value="start">Start</SelectItem>
+					<SelectItem value="end">End</SelectItem>
+				</SelectContent>
+			</Select>
 			<div className="flex items-center space-x-2">
 				<Input
 					type="text"

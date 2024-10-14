@@ -17,9 +17,9 @@ export default function Index() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="flex-grow flex">
+      <div className="flex">
         <Sidebar onModeChange={setMode} mode={mode} />
-        <main className="flex-grow p-4">
+        <main className="flex-1 p-4">
           {mode === 'code' ? <CodeConvertor /> : <FilesConvertor />}
         </main>
       </div>

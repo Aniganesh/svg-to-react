@@ -444,15 +444,11 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
         (setToUse as (typeof groupedByLanguage)["ts"]).importExtendingInterface,
       );
     }
-    if (options.interfaceExtend?.name) {
-      template.push(
-        (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithExtend,
-      );
-    } else {
-      template.push(
-        (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
-      );
-    }
+    template.push(
+      options.interfaceExtend?.name
+        ? (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithExtend
+        : (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
+    );
   }
 
   template.push(setToUse.namedExport);
@@ -528,10 +524,7 @@ export const convertSvgToReact = async (
     }
   }
 
-  fileContent = fileContent.replace(
-    /%name%/g,
-    toStartCase(name),
-  );
+  fileContent = fileContent.replace(/%name%/g, toStartCase(name));
   fileContent = fileContent.replace(/%componentContent%/g, svgContent);
 
   if (templateOptions.reactNative) {
@@ -598,7 +591,6 @@ export const convertSvgToReact = async (
   fileContent = fileContent.replace(HTMLCommentRegex, "");
   fileContent = fileContent.replace(/return\s*\n/g, "return ");
 
-  
   return prettier.format(fileContent, {
     parser: "typescript",
     plugins: [typescript, estree],

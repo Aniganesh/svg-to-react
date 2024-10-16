@@ -53,18 +53,26 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [conversionOptions]);
 
-	return <div>
-		<TemplateCustomizer
-			conversionOptions={conversionOptions}
-			setConversionOptions={setConversionOptions}
-			componentNameRef={componentNameRef}
-			handleComponentNameChange={handleComponentNameChange}
-		/>
-		<div className="flex flex-col md:flex-row gap-4">
-			<div className="max-w-[calc(50vw_-_64px)] flex-1">
-				<CodeEditor onChange={handleXmlChange} type="xml" />
-			</div>
-			<div className="relative flex-1 max-w-[calc(50vw_-_64px)]">
+	return <div className="flex flex-col md:flex-row gap-4">
+		<div className="max-w-[calc(50vw_-_64px)] flex-1">
+			{!!componentNameRef && !!handleComponentNameChange && <input
+				type="text"
+				defaultValue={componentNameRef.current}
+				className="p-2 text-white outline-none bg-transparent border-b border-transparent focus:border-white flex-1"
+				onChange={(e) => {
+					handleComponentNameChange(e.target.value);
+				}}
+				placeholder="Enter component name"
+			/>}
+			<CodeEditor onChange={handleXmlChange} type="xml" />
+		</div>
+		<div className="relative flex-1 max-w-[calc(50vw_-_64px)]">
+			<TemplateCustomizer
+				conversionOptions={conversionOptions}
+				setConversionOptions={setConversionOptions}
+			/>
+			<div className='relative'>
+
 				<div className="absolute right-2 top-2 z-10 flex gap-2">
 					<Button className="shadow-xl shadow-slate-700/50" onClick={copyJS}><ClipboardCopy size={18} /></Button>
 					<Button className="shadow-xl shadow-slate-700/50" onClick={downloadJS}><Download size={18} /></Button>
@@ -72,7 +80,8 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 				<CodeEditor value={js} onChange={setJs} type="js" editable={false} />
 			</div>
 		</div>
-	</div>;
+	</div>
+		;
 };
 
 export default CodeConvertor;

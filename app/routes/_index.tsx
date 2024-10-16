@@ -17,7 +17,7 @@ export default function Index() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="flex">
+      <div className="flex h-[calc(100vh_-_64px)]">
         <Sidebar onModeChange={setMode} mode={mode} />
         <main className="flex-1 p-4">
           {mode === 'code' ? <CodeConvertor /> : <FilesConvertor />}

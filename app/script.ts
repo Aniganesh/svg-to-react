@@ -362,9 +362,14 @@ export interface TemplateOptions {
   addDefaultExport?: boolean;
   language: "ts" | "js";
   reactNative?: boolean;
+  replaceValues?: {
+    oldValue: string;
+    newValue: string;
+    addToInterface?: boolean;
+    destructureFromProps?: boolean;
+  }[];
   /*  TODO:
   Add support for:
-  - replacing values
   - ref
   - memo
   - title, description props
@@ -480,7 +485,50 @@ export const convertSvgToReact = async (
     }
   });
 
-  let fileContent = getReactTemplate(templateOptions).replace(
+  let fileContent = getReactTemplate(templateOptions);
+  if (
+    templateOptions.replaceValues &&
+    templateOptions.replaceValues.length > 0
+  ) {
+    const propsToDestructure: string[] = [];
+    const interfaceAdditions: string[] = [];
+
+    templateOptions.replaceValues.forEach((item) => {
+      if (!item) return;
+      const { oldValue, newValue, addToInterface, destructureFromProps } = item;
+      if (!oldValue || !newValue) return;
+      const regex = new RegExp(`"${oldValue}"`, "g");
+      svgContent = svgContent.replace(regex, `{${newValue}}`);
+
+      if (addToInterface) {
+        interfaceAdditions.push(`${newValue}: string;`);
+      }
+
+      if (destructureFromProps) {
+        propsToDestructure.push(newValue);
+      }
+    });
+
+    if (interfaceAdditions.length > 0) {
+      const interfaceRegex = /interface %name%Props.*?\{.*?\}/s;
+      const newInterface = fileContent
+        .match(interfaceRegex)?.[0]
+        .replace("}", `  ${interfaceAdditions.join("\n  ")}\n}`);
+      if (newInterface) {
+        fileContent = fileContent.replace(interfaceRegex, newInterface);
+      }
+    }
+
+    if (propsToDestructure.length > 0) {
+      const propsString = propsToDestructure.join(", ");
+      fileContent = fileContent.replace(
+        /export const %name%.*?\((props|)\).*?{/s,
+        `export const %name%: FC<%name%Props> = ({ ${propsString}, ...props }) => {`,
+      );
+    }
+  }
+
+  fileContent = fileContent.replace(
     /%name%/g,
     toStartCase(name),
   );
@@ -550,6 +598,7 @@ export const convertSvgToReact = async (
   fileContent = fileContent.replace(HTMLCommentRegex, "");
   fileContent = fileContent.replace(/return\s*\n/g, "return ");
 
+  
   return prettier.format(fileContent, {
     parser: "typescript",
     plugins: [typescript, estree],

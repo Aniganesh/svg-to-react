@@ -381,7 +381,7 @@ const defaultTemplateOptions: TemplateOptions = {
   language: TYPESCRIPT_KEY,
 };
 
-const reactTSImport = "import React, { FC } from 'react';";
+const reactTSImport = "import React, { FC%otherImports% } from 'react';";
 const reactJSImport = "import React from 'react';";
 const reactNativeImport = "import { %rnSvgImports% } from 'react-native-svg';";
 
@@ -431,7 +431,10 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
   }
 
   if (options.language === TYPESCRIPT_KEY) {
-    if (options.interfaceExtend?.from) {
+    if (
+      options.interfaceExtend?.from &&
+      options.interfaceExtend.from !== "react"
+    ) {
       template.push(
         (setToUse as (typeof groupedByLanguage)["ts"]).importExtendingInterface,
       );
@@ -459,6 +462,8 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
 const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
   attribute.includes("-"),
 );
+
+// There is probably a better pattern for this.
 
 export const convertSvgToReact = async (
   svgContent: string,
@@ -509,12 +514,28 @@ export const convertSvgToReact = async (
       templateOptions.interfaceExtend.name,
     );
   }
+
   if (templateOptions.interfaceExtend?.from) {
-    fileContent = fileContent.replace(
-      /%import%/g,
-      templateOptions.interfaceExtend.from,
-    );
+    if (
+      templateOptions.interfaceExtend.from === "react" &&
+      templateOptions.interfaceExtend.name
+    ) {
+      fileContent = fileContent.replace(/%import%/g, "");
+      fileContent = fileContent.replace(
+        /%otherImports%/g,
+        `,${templateOptions.interfaceExtend.name}`,
+      );
+    } else {
+      fileContent = fileContent.replace(
+        /%import%/g,
+        templateOptions.interfaceExtend.from,
+      );
+      fileContent = fileContent.replace(/%otherImports%/g, "");
+    }
+  } else {
+    fileContent = fileContent.replace(/%otherImports%/g, "");
   }
+
   switch (templateOptions.spreadProps) {
     case "start":
       fileContent = fileContent?.replace(/<svg(.*?)>/g, "<svg {...props} $1>");
@@ -540,6 +561,6 @@ export const convertSvgToReact = async (
     useTabs: false,
     jsxSingleQuote: false,
     bracketSpacing: true,
-    arrowParens: "avoid",
+    arrowParens: "always",
   });
 };

@@ -464,7 +464,7 @@ const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
   attribute.includes("-"),
 );
 
-// There is probably a better pattern for this.
+// We could define the template options as a bunch of rules and transformations to be applied to the file content and have a fsm that checks if the rule is applicable and applies it. The current version is a very loosely defined way to do it.
 
 export const convertSvgToReact = async (
   svgContent: string,

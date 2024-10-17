@@ -368,6 +368,8 @@ export interface TemplateOptions {
     addToInterface?: boolean;
     destructureFromProps?: boolean;
   }[];
+  title?: string;
+  description?: string;
   /*  TODO:
   Add support for:
   - ref
@@ -480,7 +482,35 @@ export const convertSvgToReact = async (
       );
     }
   });
+  if (templateOptions.title || templateOptions.description) {
+    const titleRegex = /<title>(.*?)<\/title>/;
+    const descriptionRegex = /<desc>(.*?)<\/desc>/;
+    const svgOpenTagRegex = /<[sS]vg([^>]*)>/;
 
+    let titleTag = "";
+    let descTag = "";
+
+    if (templateOptions.title) {
+      titleTag = `<title>${templateOptions.title}</title>`;
+    }
+
+    if (templateOptions.description) {
+      descTag = `<desc>${templateOptions.description}</desc>`;
+    }
+
+    const insertTags = titleTag + descTag;
+
+    if (titleRegex.test(svgContent) && descriptionRegex.test(svgContent)) {
+      svgContent = svgContent.replace(titleRegex, titleTag);
+      svgContent = svgContent.replace(descriptionRegex, descTag);
+    } else if (titleRegex.test(svgContent)) {
+      svgContent = svgContent.replace(titleRegex, `${insertTags}`);
+    } else if (descriptionRegex.test(svgContent)) {
+      svgContent = svgContent.replace(descriptionRegex, `${insertTags}`);
+    } else {
+      svgContent = svgContent.replace(svgOpenTagRegex, `<svg$1>${insertTags}`);
+    }
+  }
   let fileContent = getReactTemplate(templateOptions);
   if (
     templateOptions.replaceValues &&
@@ -579,14 +609,15 @@ export const convertSvgToReact = async (
 
   switch (templateOptions.spreadProps) {
     case "start":
-      fileContent = fileContent?.replace(/<svg(.*?)>/g, "<svg {...props} $1>");
+      fileContent = fileContent?.replace(/(<[sS]vg)(.*?>)/g, (match, p1, p2) => `${p1} {...props}${p2}`);
       break;
     case "end":
-      fileContent = fileContent?.replace(/<svg(.*?)>/g, "<svg $1 {...props}>");
+      fileContent = fileContent?.replace(/(<[sS]vg)(.*?>)/g, (match, p1, p2) => `${p1}${p2.slice(0, -1)} {...props}>`);
       break;
     default:
       break;
   }
+
   fileContent = fileContent.replace(XMLDeclarationRegex, "");
   fileContent = fileContent.replace(HTMLCommentRegex, "");
   fileContent = fileContent.replace(/return\s*\n/g, "return ");

@@ -16,6 +16,7 @@ interface CodeEditorProps {
 export const CodeEditor: FC<CodeEditorProps> = ({ value, onChange, type, editable = true }) => {
 	return <ClientOnly>
 		<ReactCodeMirror
+			className='w-full'
 			height="100%"
 			value={value}
 			onChange={onChange}

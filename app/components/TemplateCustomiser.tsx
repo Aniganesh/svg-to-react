@@ -86,6 +86,34 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				}));
 			}}
 		/>
+		<div className="flex items-center gap-2">
+			<Input
+				type="text"
+				placeholder="Title"
+				value={conversionOptions.title || ''}
+				className="flex-1"
+				onChange={(e) => {
+					const title = e.target.value;
+					setConversionOptions({
+						...conversionOptions,
+						title: title
+					});
+				}}
+			/>
+			<Input
+				type="text"
+				placeholder="Description"
+				value={conversionOptions.description || ''}
+				className="flex-1"
+				onChange={(e) => {
+					const description = e.target.value;
+					setConversionOptions({
+						...conversionOptions,
+						description: description
+					});
+				}}
+			/>
+		</div>
 		<Input
 			type="text"
 			placeholder="Import extending interface from"
@@ -100,17 +128,12 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 			}}
 		/>
 
+
+
 		{isReplacersExpanded ? (
 			<>
 				{conversionOptions.replaceValues?.map((value, index) => {
-					return <div key={index} className="flex items-center gap-2">
-						<Button onClick={() => {
-							setConversionOptions(({
-								...conversionOptions, replaceValues: conversionOptions.replaceValues?.filter((v, i) => i !== index)
-							}));
-						}} >
-							<X className="w-4 h-4" />
-						</Button>
+					return <div key={index} className="flex items-center gap-2 flex-wrap relative">
 						<div className='flex items-center gap-2'>
 							<Input
 								type="text"
@@ -153,6 +176,13 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 									}));
 								}}
 							/>
+							<Button onClick={() => {
+								setConversionOptions(({
+									...conversionOptions, replaceValues: conversionOptions.replaceValues?.filter((v, i) => i !== index)
+								}));
+							}} className='p-2 py-2 h-fit' variant="ghost">
+								<X className="w-4 h-4" />
+							</Button>
 						</div>
 						<div className='flex items-center gap-2'>
 							<Switch

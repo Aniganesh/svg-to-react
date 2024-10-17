@@ -42,22 +42,27 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				setConversionOptions(({ ...conversionOptions, language: value as TemplateOptions["language"] }));
 			}} />
 
-		<Switch
-			id="default-export"
-			checked={conversionOptions.addDefaultExport}
-			onCheckedChange={(checked: boolean) => {
-				setConversionOptions(({ ...conversionOptions, addDefaultExport: checked }));
-			}}
-		/>
-		<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
-		<Switch
-			id="rn-svg"
-			checked={conversionOptions.reactNative}
-			onCheckedChange={(checked: boolean) => {
-				setConversionOptions(({ ...conversionOptions, reactNative: checked }));
-			}}
-		/>
-		<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
+		<div className='flex items-center gap-2'>
+			<Switch
+				id="default-export"
+				checked={conversionOptions.addDefaultExport}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, addDefaultExport: checked }));
+				}}
+			/>
+			<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
+		</div>
+		<div className='flex items-center gap-2'>
+
+			<Switch
+				id="rn-svg"
+				checked={conversionOptions.reactNative}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, reactNative: checked }));
+				}}
+			/>
+			<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
+		</div>
 		<Select
 			value={conversionOptions.spreadProps}
 			onValueChange={(value) => {
@@ -83,6 +88,19 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				setConversionOptions(({
 					...conversionOptions,
 					interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
+				}));
+			}}
+		/>
+		<Input
+			type="text"
+			placeholder="Import extending interface from"
+			className="flex-1"
+			value={conversionOptions.interfaceExtend?.from || ''}
+			onChange={(e) => {
+				const from = e.target.value;
+				setConversionOptions(({
+					...conversionOptions,
+					interfaceExtend: { ...conversionOptions.interfaceExtend, from }
 				}));
 			}}
 		/>
@@ -114,21 +132,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				}}
 			/>
 		</div>
-		<Input
-			type="text"
-			placeholder="Import extending interface from"
-			className="flex-1"
-			value={conversionOptions.interfaceExtend?.from || ''}
-			onChange={(e) => {
-				const from = e.target.value;
-				setConversionOptions(({
-					...conversionOptions,
-					interfaceExtend: { ...conversionOptions.interfaceExtend, from }
-				}));
-			}}
-		/>
-
-
+		
 
 		{isReplacersExpanded ? (
 			<>

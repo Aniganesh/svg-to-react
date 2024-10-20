@@ -370,6 +370,7 @@ export interface TemplateOptions {
   }[];
   title?: string;
   description?: string;
+  ref?: boolean;
   /*  TODO:
   Add support for:
   - ref
@@ -388,8 +389,8 @@ const defaultTemplateOptions: TemplateOptions = {
   language: TYPESCRIPT_KEY,
 };
 
-const reactTSImport = "import React, { FC%otherImports% } from 'react';";
-const reactJSImport = "import React from 'react';";
+const reactTSImport = "import React %otherImports% from 'react';";
+const reactJSImport = "import React %otherImports% from 'react';";
 const reactNativeImport = "import { %rnSvgImports% } from 'react-native-svg';";
 
 const reactTSImportExtendingInterface = `import { %extend% } from "%import%";`;
@@ -402,6 +403,12 @@ const defaultExport = "export default %name%;";
 const namedExportReactTS = `export const %name%: FC<%name%Props> = (props) => {
 	return %componentContent%;
 };`;
+const namedExportWithRefReactTS = `export const %name% = forwardRef<SVGSVGElement, %name%Props>((props, ref) => {
+	return %componentContent%;
+});`;
+const namedExportWithRefReactJS = `export const %name% = forwardRef((props, ref) => {
+	return %componentContent%;
+});`;
 
 const namedExportReactJS = `export const %name% = (props) => {
 	return %componentContent%;
@@ -411,6 +418,7 @@ const groupedByLanguage = {
   js: {
     import: reactJSImport,
     namedExport: namedExportReactJS,
+    namedExportWithRef: namedExportWithRefReactJS,
     reactNativeImport,
     defaultExport,
   } as const,
@@ -418,6 +426,7 @@ const groupedByLanguage = {
     import: reactTSImport,
     reactNativeImport,
     namedExport: namedExportReactTS,
+    namedExportWithRef: namedExportWithRefReactTS,
     interfaceWithoutExtend: reactTSInterfaceWithoutExtend,
     interfaceWithExtend: reactTSInterfaceWithExtend,
     importExtendingInterface: reactTSImportExtendingInterface,
@@ -452,8 +461,11 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
         : (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
     );
   }
-
-  template.push(setToUse.namedExport);
+  if (options.ref) {
+    template.push(setToUse.namedExportWithRef);
+  } else {
+    template.push(setToUse.namedExport);
+  }
 
   if (options.addDefaultExport) {
     template.push(setToUse.defaultExport);
@@ -467,7 +479,7 @@ const attributesWithHyphen = allSVGAttributes.filter((attribute) =>
 );
 
 // We could define the template options as a bunch of rules and transformations to be applied to the file content and have a fsm that checks if the rule is applicable and applies it. The current version is a very loosely defined way to do it.
-
+// Current method of creating a template and then making a bunch of replacements is prone to errors.
 export const convertSvgToReact = async (
   svgContent: string,
   name: string,
@@ -585,34 +597,47 @@ export const convertSvgToReact = async (
       templateOptions.interfaceExtend.name,
     );
   }
-
+  const allOtherReactImports = [templateOptions.interfaceExtend?.from];
+  if (templateOptions.language === "ts") {
+    allOtherReactImports.push("FC");
+  }
+  if (templateOptions.ref) {
+    allOtherReactImports.push("forwardRef");
+  }
   if (templateOptions.interfaceExtend?.from) {
     if (
       templateOptions.interfaceExtend.from === "react" &&
       templateOptions.interfaceExtend.name
     ) {
       fileContent = fileContent.replace(/%import%/g, "");
-      fileContent = fileContent.replace(
-        /%otherImports%/g,
-        `,${templateOptions.interfaceExtend.name}`,
-      );
     } else {
       fileContent = fileContent.replace(
         /%import%/g,
         templateOptions.interfaceExtend.from,
       );
-      fileContent = fileContent.replace(/%otherImports%/g, "");
     }
+  }
+
+  if (allOtherReactImports.length) {
+    fileContent = fileContent.replace(
+      /%otherImports%/g,
+      `,{${allOtherReactImports.filter((v)=>!!v ).join(", ")}}`,
+    );
   } else {
     fileContent = fileContent.replace(/%otherImports%/g, "");
   }
-
   switch (templateOptions.spreadProps) {
     case "start":
-      fileContent = fileContent?.replace(/(<[sS]vg)(.*?>)/g, (match, p1, p2) => `${p1} {...props}${p2}`);
+      fileContent = fileContent?.replace(
+        /(<[sS]vg)(.*?>)/g,
+        (match, p1, p2) => `${p1} {...props}${p2}`,
+      );
       break;
     case "end":
-      fileContent = fileContent?.replace(/(<[sS]vg)(.*?>)/g, (match, p1, p2) => `${p1}${p2.slice(0, -1)} {...props}>`);
+      fileContent = fileContent?.replace(
+        /(<[sS]vg)(.*?>)/g,
+        (match, p1, p2) => `${p1}${p2.slice(0, -1)} {...props}>`,
+      );
       break;
     default:
       break;

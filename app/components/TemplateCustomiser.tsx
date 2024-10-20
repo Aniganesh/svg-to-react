@@ -132,7 +132,16 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				}}
 			/>
 		</div>
-		
+		<div className='flex items-center gap-2'>
+			<Switch
+				id="ref"
+				checked={conversionOptions.ref}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, ref: checked }));
+				}}
+			/>
+			<Label htmlFor="ref" className="text-sm text-gray-300">Forward ref</Label>
+		</div>
 
 		{isReplacersExpanded ? (
 			<>

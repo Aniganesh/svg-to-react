@@ -50,21 +50,23 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 			}}
 		/>
 		<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
-		<Switch
-			id="rn-svg"
-			checked={conversionOptions.reactNative}
-			onCheckedChange={(checked: boolean) => {
-				setConversionOptions(({ ...conversionOptions, reactNative: checked }));
-			}}
-		/>
-		<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
+		<div className="flex gap-2">
+			<Switch
+				id="rn-svg"
+				checked={conversionOptions.reactNative}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, reactNative: checked }));
+				}}
+			/>
+			<Label htmlFor="rn-svg" className="text-sm text-gray-300">React native</Label>
+		</div>
 		<Select
 			value={conversionOptions.spreadProps}
 			onValueChange={(value) => {
 				setConversionOptions({ ...conversionOptions, spreadProps: value as TemplateOptions['spreadProps'] });
 			}}
 		>
-			<SelectTrigger className="w-32">
+			<SelectTrigger className='max-w-36'>
 				<SelectValue placeholder="Spread Props" />
 			</SelectTrigger>
 			<SelectContent className="flex-1">
@@ -73,19 +75,6 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				<SelectItem value="end">End</SelectItem>
 			</SelectContent>
 		</Select>
-		<Input
-			type="text"
-			placeholder="Extend interface"
-			value={conversionOptions.interfaceExtend?.name || ''}
-			className="flex-1"
-			onChange={(e) => {
-				const name = e.target.value;
-				setConversionOptions(({
-					...conversionOptions,
-					interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
-				}));
-			}}
-		/>
 		<div className="flex items-center gap-2">
 			<Input
 				type="text"
@@ -114,6 +103,19 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				}}
 			/>
 		</div>
+		<Input
+			type="text"
+			placeholder="Extend interface"
+			value={conversionOptions.interfaceExtend?.name || ''}
+			className="flex-1"
+			onChange={(e) => {
+				const name = e.target.value;
+				setConversionOptions(({
+					...conversionOptions,
+					interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
+				}));
+			}}
+		/>
 		<Input
 			type="text"
 			placeholder="Import extending interface from"

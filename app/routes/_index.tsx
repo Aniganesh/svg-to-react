@@ -14,7 +14,10 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const [mode, setMode] = useState<Mode>('code');
-  return (
+  return (<>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />
     <div className="min-h-screen flex flex-col">
       <Header />
       <div className="flex h-[calc(100vh_-_64px)]">
@@ -24,5 +27,6 @@ export default function Index() {
         </main>
       </div>
     </div>
+  </>
   );
 }

@@ -14,7 +14,7 @@ interface TemplateCustomizerProps {
 	setConversionOptions: (value: DeepPartial<TemplateOptions>) => void;
 }
 
-export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
+export const TemplateCustomiser: FC<TemplateCustomizerProps> = ({
 	conversionOptions,
 	setConversionOptions,
 }) => {
@@ -42,15 +42,18 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				setConversionOptions(({ ...conversionOptions, language: value as TemplateOptions["language"] }));
 			}} />
 
-		<Switch
-			id="default-export"
-			checked={conversionOptions.addDefaultExport}
-			onCheckedChange={(checked: boolean) => {
-				setConversionOptions(({ ...conversionOptions, addDefaultExport: checked }));
-			}}
-		/>
-		<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
-		<div className="flex gap-2">
+		<div className='flex items-center gap-2'>
+			<Switch
+				id="default-export"
+				checked={conversionOptions.addDefaultExport}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, addDefaultExport: checked }));
+				}}
+			/>
+			<Label htmlFor="default-export" className="text-sm text-gray-300">Default Export</Label>
+		</div>
+		<div className='flex items-center gap-2'>
+
 			<Switch
 				id="rn-svg"
 				checked={conversionOptions.reactNative}
@@ -75,6 +78,32 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				<SelectItem value="end">End</SelectItem>
 			</SelectContent>
 		</Select>
+		<Input
+			type="text"
+			placeholder="Extend interface"
+			value={conversionOptions.interfaceExtend?.name || ''}
+			className="flex-1"
+			onChange={(e) => {
+				const name = e.target.value;
+				setConversionOptions(({
+					...conversionOptions,
+					interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
+				}));
+			}}
+		/>
+		<Input
+			type="text"
+			placeholder="Import extending interface from"
+			className="flex-1"
+			value={conversionOptions.interfaceExtend?.from || ''}
+			onChange={(e) => {
+				const from = e.target.value;
+				setConversionOptions(({
+					...conversionOptions,
+					interfaceExtend: { ...conversionOptions.interfaceExtend, from }
+				}));
+			}}
+		/>
 		<div className="flex items-center gap-2">
 			<Input
 				type="text"
@@ -103,34 +132,16 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				}}
 			/>
 		</div>
-		<Input
-			type="text"
-			placeholder="Extend interface"
-			value={conversionOptions.interfaceExtend?.name || ''}
-			className="flex-1"
-			onChange={(e) => {
-				const name = e.target.value;
-				setConversionOptions(({
-					...conversionOptions,
-					interfaceExtend: name ? { ...conversionOptions.interfaceExtend, name } : undefined
-				}));
-			}}
-		/>
-		<Input
-			type="text"
-			placeholder="Import extending interface from"
-			className="flex-1"
-			value={conversionOptions.interfaceExtend?.from || ''}
-			onChange={(e) => {
-				const from = e.target.value;
-				setConversionOptions(({
-					...conversionOptions,
-					interfaceExtend: { ...conversionOptions.interfaceExtend, from }
-				}));
-			}}
-		/>
-
-
+		<div className='flex items-center gap-2'>
+			<Switch
+				id="ref"
+				checked={conversionOptions.ref}
+				onCheckedChange={(checked: boolean) => {
+					setConversionOptions(({ ...conversionOptions, ref: checked }));
+				}}
+			/>
+			<Label htmlFor="ref" className="text-sm text-gray-300">Forward ref</Label>
+		</div>
 
 		{isReplacersExpanded ? (
 			<>
@@ -279,7 +290,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 	</div>;
 };
 
-export default TemplateCustomizer;
+export default TemplateCustomiser;
 
 
 const TsIcon = () => <div className="size-8 flex items-end justify-end pr-1 text-xl text-right text-white rounded-sm">Ts</div>;

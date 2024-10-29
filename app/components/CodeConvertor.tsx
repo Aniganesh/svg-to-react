@@ -3,7 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { TemplateOptions, convertSvgToReact } from '~/script';
 import { DeepPartial } from '~/util-types';
 import { CodeEditor } from './CodeEditor';
-import { TemplateCustomizer } from './TemplateCustomiser';
+import { TemplateCustomiser } from './TemplateCustomiser';
 import { Button } from './ui/button';
 
 interface CodeConvertorProps { }
@@ -74,7 +74,7 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 			<CodeEditor value={js} onChange={setJs} type="js" editable={false} />
 		</div>
 		<div className='max-w-80 pl-4 flex-1'>
-			<TemplateCustomizer
+			<TemplateCustomiser
 				conversionOptions={conversionOptions}
 				setConversionOptions={setConversionOptions}
 			/>

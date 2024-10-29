@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { BlobReader, ZipReader, TextWriter, BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { convertSvgToReact, TemplateOptions, toStartCase } from "../script";
 import { Button } from "~/components/ui/button";
-import { TemplateCustomizer } from "./TemplateCustomiser";
+import { TemplateCustomiser } from "./TemplateCustomiser";
 import { DeepPartial } from "~/util-types";
 import { useDropzone } from 'react-dropzone-esm';
 import { cn } from "~/lib/utils";
@@ -80,7 +80,7 @@ export const FilesConvertor: React.FC<FilesConvertorProps> = () => {
 	return (
 		<>
 			<div className="flex justify-center">
-				<TemplateCustomizer
+				<TemplateCustomiser
 					conversionOptions={conversionOptions}
 					setConversionOptions={setConversionOptions}
 				/>

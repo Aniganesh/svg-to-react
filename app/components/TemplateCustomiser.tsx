@@ -14,7 +14,7 @@ interface TemplateCustomizerProps {
 	setConversionOptions: (value: DeepPartial<TemplateOptions>) => void;
 }
 
-export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
+export const TemplateCustomiser: FC<TemplateCustomizerProps> = ({
 	conversionOptions,
 	setConversionOptions,
 }) => {
@@ -69,7 +69,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 				setConversionOptions({ ...conversionOptions, spreadProps: value as TemplateOptions['spreadProps'] });
 			}}
 		>
-			<SelectTrigger className="w-32">
+			<SelectTrigger className='max-w-36'>
 				<SelectValue placeholder="Spread Props" />
 			</SelectTrigger>
 			<SelectContent className="flex-1">
@@ -290,7 +290,7 @@ export const TemplateCustomizer: FC<TemplateCustomizerProps> = ({
 	</div>;
 };
 
-export default TemplateCustomizer;
+export default TemplateCustomiser;
 
 
 const TsIcon = () => <div className="size-8 flex items-end justify-end pr-1 text-xl text-right text-white rounded-sm">Ts</div>;

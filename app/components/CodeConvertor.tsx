@@ -3,7 +3,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { TemplateOptions, convertSvgToReact } from '~/script';
 import { DeepPartial } from '~/util-types';
 import { CodeEditor } from './CodeEditor';
-import { TemplateCustomizer } from './TemplateCustomiser';
+import { TemplateCustomiser } from './TemplateCustomiser';
 import { Button } from './ui/button';
 
 interface CodeConvertorProps { }
@@ -54,7 +54,7 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 	}, [conversionOptions]);
 
 	return <div className="flex flex-col md:flex-row gap-4">
-		<div className="max-w-[calc(50vw_-_64px)] flex-1">
+		<div className="flex-1">
 			{!!componentNameRef && !!handleComponentNameChange && <input
 				type="text"
 				defaultValue={componentNameRef.current}
@@ -66,20 +66,18 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 			/>}
 			<CodeEditor onChange={handleXmlChange} type="xml" />
 		</div>
-		<div className="relative flex-1 max-w-[calc(50vw_-_64px)] flex">
-			<div className='relative flex flex-1 max-w-[calc(100%_-_320px)]'>
-				<div className="absolute right-2 top-2 z-10 flex gap-2">
-					<Button className="shadow-xl shadow-slate-700/50" onClick={copyJS}><ClipboardCopy size={18} /></Button>
-					<Button className="shadow-xl shadow-slate-700/50" onClick={downloadJS}><Download size={18} /></Button>
-				</div>
-				<CodeEditor value={js} onChange={setJs} type="js" editable={false} />
+		<div className="relative flex-1 flex">
+			<div className="absolute right-2 top-2 z-10 flex gap-2">
+				<Button className="shadow-xl shadow-slate-700/50" onClick={copyJS}><ClipboardCopy size={18} /></Button>
+				<Button className="shadow-xl shadow-slate-700/50" onClick={downloadJS}><Download size={18} /></Button>
 			</div>
-			<div className='max-w-80 pl-4'>
-				<TemplateCustomizer
-					conversionOptions={conversionOptions}
-					setConversionOptions={setConversionOptions}
-				/>
-			</div>
+			<CodeEditor value={js} onChange={setJs} type="js" editable={false} />
+		</div>
+		<div className='max-w-80 pl-4 flex-1'>
+			<TemplateCustomiser
+				conversionOptions={conversionOptions}
+				setConversionOptions={setConversionOptions}
+			/>
 		</div>
 	</div>
 		;

@@ -18,7 +18,7 @@ export const CodeEditor: FC<CodeEditorProps> = ({ value, onChange, type, editabl
 		<ReactCodeMirror
 			className='w-full'
 			height="100%"
-			value={value}
+			value={''}
 			onChange={onChange}
 			extensions={[type === 'xml' ? xml() : javascript()]}
 			basicSetup={{

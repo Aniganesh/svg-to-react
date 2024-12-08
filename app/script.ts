@@ -2,6 +2,8 @@ import { DeepPartial } from "./util-types";
 import prettier from "prettier/standalone";
 import * as typescript from "prettier/plugins/typescript.js";
 import * as estree from "prettier/plugins/estree";
+import babel from "@babel/core";
+import customBabelPlugin from "./custom-babel-plugin";
 
 const allSVGAttributes = [
   "accent-height",
@@ -486,14 +488,14 @@ export const convertSvgToReact = async (
   templateOptions: DeepPartial<TemplateOptions> = defaultTemplateOptions,
 ) => {
   // replace each of the disallowed attributes with their camelcase equivalents.
-  attributesWithHyphen.forEach((attribute) => {
-    if (svgContent.includes(attribute)) {
-      svgContent = svgContent.replace(
-        new RegExp(`${attribute}=`, "g"),
-        toCamelCase(attribute) + "=",
-      );
-    }
-  });
+  // attributesWithHyphen.forEach((attribute) => {
+  //   if (svgContent.includes(attribute)) {
+  //     svgContent = svgContent.replace(
+  //       new RegExp(`${attribute}=`, "g"),
+  //       toCamelCase(attribute) + "=",
+  //     );
+  //   }
+  // });
   if (templateOptions.title || templateOptions.description) {
     const titleRegex = /<title>(.*?)<\/title>/;
     const descriptionRegex = /<desc>(.*?)<\/desc>/;
@@ -567,7 +569,17 @@ export const convertSvgToReact = async (
   }
 
   fileContent = fileContent.replace(/%name%/g, toStartCase(name));
-  fileContent = fileContent.replace(/%componentContent%/g, svgContent);
+
+  const jsxContent = babel.transformSync(svgContent, {
+    presets: ["@babel/preset-react"],
+    plugins: [
+      [customBabelPlugin, { 
+        replaceValues: templateOptions.replaceValues 
+      }]
+    ],
+  })?.code ?? '';
+
+  fileContent = fileContent.replace(/%componentContent%/g, jsxContent);
 
   if (templateOptions.reactNative) {
     const svgElementsUsed = allSVGElementsRegexp.reduce(

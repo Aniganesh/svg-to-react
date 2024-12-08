@@ -370,13 +370,7 @@ export interface TemplateOptions {
   }[];
   title?: string;
   description?: string;
-  ref?: boolean;
-  /*  TODO:
-  Add support for:
-  - ref
-  - memo
-  - title, description props
-   */
+  ref?: "forwardRef" | "prop" | "none";
   spreadProps?: "start" | "end";
   interfaceExtend?: {
     from?: string;
@@ -412,6 +406,14 @@ const namedExportWithRefReactJS = `export const %name% = forwardRef((props, ref)
 
 const namedExportReactJS = `export const %name% = (props) => {
 	return %componentContent%;
+};`;
+
+const namedExportWithPropRefReactTS = `export const %name%: FC<%name%Props> = ({ ref, ...props }) => {
+  return %componentContent%;
+};`;
+
+const namedExportWithPropRefReactJS = `export const %name% = ({ ref, ...props }) => {
+  return %componentContent%;
 };`;
 
 const groupedByLanguage = {
@@ -461,8 +463,10 @@ const getReactTemplate = (options: DeepPartial<TemplateOptions>) => {
         : (setToUse as (typeof groupedByLanguage)["ts"]).interfaceWithoutExtend,
     );
   }
-  if (options.ref) {
+  if (options.ref === "forwardRef") {
     template.push(setToUse.namedExportWithRef);
+  } else if (options.ref === "prop") {
+    template.push(options.language === "ts" ? namedExportWithPropRefReactTS : namedExportWithPropRefReactJS);
   } else {
     template.push(setToUse.namedExport);
   }
@@ -601,7 +605,7 @@ export const convertSvgToReact = async (
   if (templateOptions.language === "ts") {
     allOtherReactImports.push("FC");
   }
-  if (templateOptions.ref) {
+  if (templateOptions.ref === "forwardRef") {
     allOtherReactImports.push("forwardRef");
   }
   if (templateOptions.interfaceExtend?.from) {

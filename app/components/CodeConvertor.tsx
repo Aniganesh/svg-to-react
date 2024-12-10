@@ -53,7 +53,7 @@ export const CodeConvertor: FC<CodeConvertorProps> = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [conversionOptions]);
 
-	return <div className="grid grid-cols-12 gap-4 h-full relative">
+		return <div className="grid grid-cols-12 gap-4 h-full relative">
 		<div className="col-span-5 h-full">
 			{!!componentNameRef && !!handleComponentNameChange && <input
 				type="text"
